@@ -12,6 +12,7 @@ public class FileSender {
 
     public FileSender(String host, int port, String file) {
         try {
+            System.out.println("Sending file " + file + " on port " + port);
             s = new Socket(host, port);
             sendFile(file);
         } catch (Exception e) {
@@ -20,17 +21,27 @@ public class FileSender {
     }
 
     public void sendFile(String file) throws IOException {
-        File f = new File(file);
+        File f;
+        try {
+            f = new File(file);
+            if (!f.exists()) {
+                System.out.println("File does not exist!");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("File not found!");
+            return;
+        }
         DataOutputStream dos = new DataOutputStream(s.getOutputStream());
         FileInputStream fis = new FileInputStream(file);
         byte[] buffer = new byte[4096];
 
         String fileName = f.getName();
-        System.out.println("fileName: " + fileName);
+        System.out.println("File name: " + fileName);
         dos.writeUTF(fileName);
 
-        long fileSize = f.getTotalSpace();
-        System.out.println("fileSize: " + fileSize);
+        long fileSize = f.length();
+        System.out.println("File size: " + fileSize);
         dos.writeLong(f.length());
 
         while (fis.read(buffer) > 0) {
