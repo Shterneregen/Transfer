@@ -44,16 +44,14 @@ public class FileReceiver extends Thread {
 
         int count = 1;
         int read = 0;
-        int totalRead = 0;
         int remaining = (int) fileSize;
         while ((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) {
-            totalRead += read;
             remaining -= read;
+
             System.out.print(".");
             if (count % 50 == 0) {
                 System.out.println();
             }
-//            System.out.println("read " + totalRead + " bytes.");
             fos.write(buffer, 0, read);
             count++;
         }
