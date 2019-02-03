@@ -10,14 +10,10 @@ public class FileSender {
 
     private Socket s;
 
-    public FileSender(String host, int port, String file) {
-        try {
-            System.out.println("Sending file " + file + " on port " + port);
-            s = new Socket(host, port);
-            sendFile(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public FileSender(String host, int port, String file) throws IOException {
+        System.out.println("Sending file " + file + " on port " + port);
+        s = new Socket(host, port);
+        sendFile(file);
     }
 
     public void sendFile(String file) throws IOException {

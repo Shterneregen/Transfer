@@ -10,13 +10,9 @@ public class FileReceiver extends Thread {
 
     private ServerSocket ss;
 
-    public FileReceiver(int port) {
-        try {
-            ss = new ServerSocket(port);
-            System.out.println("Ready to receive on port " + port + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public FileReceiver(int port) throws Exception {
+        ss = new ServerSocket(port);
+        System.out.println("Ready to receive on port " + port + "\n");
     }
 
     public void run() {
