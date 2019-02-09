@@ -1,13 +1,21 @@
 # File transfer over the network
 
-usage:
+## Simple mode
+### receiver
 ```
-transfer.jar [-r RECEIVER_PORT FILE_PATH] [-t RECEIVER_IP RECEIVER_PORT FILE_PATH] [-h] [--help] [/h] [/?] [?]
+java -jar transfer.jar -r RECEIVER_PORT
+```
+### transmitter
+```
+java -jar transfer.jar -t RECEIVER_IP RECEIVER_PORT FILE_TO_SEND
 ```
 
-##### Optional arguments:
+## SSL mode
+### receiver
 ```
--h, --help, /h                               help info
--r RECEIVER_PORT FILE_PATH                   receiver mode
--t RECEIVER_IP RECEIVER_PORT FILE_NAME       transmitter mode
+java -jar transfer.jar -rs RECEIVER_PORT RECEIVER_KEYSTORE_PATH RECEIVER_KEYSTORE_PASSWORD
+```
+### transmitter
+```
+java -jar transfer.jar -ts RECEIVER_IP RECEIVER_PORT TRANSMITTER_KEYSTORE_PATH TRANSMITTER_KEYSTORE_PASSWORD FILE_TO_SEND
 ```

@@ -1,6 +1,8 @@
 package random;
 
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,26 +10,32 @@ import java.net.Socket;
 
 public class FileReceiver extends Thread {
 
-    private ServerSocket ss;
+    private ServerSocket serverSocket;
 
-    public FileReceiver(int port) throws Exception {
-        ss = new ServerSocket(port);
+    public FileReceiver(int port, boolean isSecure) throws Exception {
+        if (isSecure) {
+            SSLServerSocketFactory sslServerSocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            serverSocket = sslServerSocketfactory.createServerSocket(port);
+        } else {
+            serverSocket = new ServerSocket(port);
+        }
+        System.out.println("SSL: " + isSecure);
         System.out.println("Ready to receive on port " + port + "\n");
     }
 
     public void run() {
         while (true) {
             try {
-                Socket clientSock = ss.accept();
-                saveFile(clientSock);
+                Socket receiverSocket = serverSocket.accept();
+                saveFile(receiverSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void saveFile(Socket clientSock) throws IOException {
-        DataInputStream dis = new DataInputStream(clientSock.getInputStream());
+    private void saveFile(Socket receiverSocket) throws IOException {
+        DataInputStream dis = new DataInputStream(receiverSocket.getInputStream());
         byte[] buffer = new byte[4096];
         String fileName = dis.readUTF();
         long fileSize = dis.readLong();
@@ -36,7 +44,7 @@ public class FileReceiver extends Thread {
         System.out.println("File name: " + fileName);
         System.out.println("File size: " + fileSize);
 
-        FileOutputStream fos = new FileOutputStream("t_" + fileName);
+        FileOutputStream fos = new FileOutputStream(genName(fileName, 0));
 
         int count = 1;
         int read = 0;
@@ -55,6 +63,27 @@ public class FileReceiver extends Thread {
         System.out.println("Reception complete");
         fos.close();
         dis.close();
+        receiverSocket.close();
+    }
+
+    private String genName(String fileName, int index) {
+        File tmpDir = new File(fileName);
+        boolean exists = tmpDir.exists();
+        if (exists) {
+            String ext = getFileExtension(fileName);
+            String name = String.format("%s.%s", index, ext);
+            return genName(name, ++index);
+        } else {
+            return fileName;
+        }
+    }
+
+    private String getFileExtension(String name) {
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(lastIndexOf + 1);
     }
 
 }

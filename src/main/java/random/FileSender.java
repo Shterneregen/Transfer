@@ -1,5 +1,6 @@
 package random;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,11 +9,18 @@ import java.net.Socket;
 
 public class FileSender {
 
-    private Socket s;
+    private Socket socket;
 
-    public FileSender(String host, int port, String file) throws IOException {
+    public FileSender(String host, int port, boolean isSecure, String file) throws IOException {
+        System.out.println("SSL: " + isSecure);
         System.out.println("Sending file " + file + " on port " + port);
-        s = new Socket(host, port);
+
+        if (isSecure) {
+            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            socket = sslsocketfactory.createSocket(host, port);
+        } else {
+            socket = new Socket(host, port);
+        }
         sendFile(file);
     }
 
@@ -28,7 +36,7 @@ public class FileSender {
             System.out.println("File not found!");
             return;
         }
-        DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
         FileInputStream fis = new FileInputStream(file);
         byte[] buffer = new byte[4096];
 
@@ -46,6 +54,7 @@ public class FileSender {
 
         fis.close();
         dos.close();
+        socket.close();
     }
 
 }
