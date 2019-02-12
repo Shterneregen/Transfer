@@ -35,35 +35,43 @@ public class FileReceiver extends Thread {
     }
 
     private void saveFile(Socket receiverSocket) throws IOException {
-        DataInputStream dis = new DataInputStream(receiverSocket.getInputStream());
-        byte[] buffer = new byte[4096];
-        String fileName = dis.readUTF();
-        long fileSize = dis.readLong();
+        DataInputStream dis = null;
+        FileOutputStream fos = null;
+        try {
+            dis = new DataInputStream(receiverSocket.getInputStream());
+            byte[] buffer = new byte[4096];
+            String fileName = dis.readUTF();
+            long fileSize = dis.readLong();
 
-        System.out.println("File reception");
-        System.out.println("File name: " + fileName);
-        System.out.println("File size: " + fileSize);
+            System.out.println("File reception");
+            System.out.println("File name: " + fileName);
+            System.out.println("File size: " + fileSize + " bytes");
 
-        FileOutputStream fos = new FileOutputStream(genName(fileName, 0));
+            fos = new FileOutputStream(genName(fileName, 0));
 
-        int count = 1;
-        int read = 0;
-        int remaining = (int) fileSize;
-        while ((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) {
-            remaining -= read;
+            int count = 1;
+            int read = 0;
+            int remaining = (int) fileSize;
+            while ((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) {
+                remaining -= read;
 
-            System.out.print(".");
-            if (count % 50 == 0) {
-                System.out.println();
+                System.out.print(".");
+                if (count % 50 == 0) {
+                    System.out.println();
+                }
+                fos.write(buffer, 0, read);
+                count++;
             }
-            fos.write(buffer, 0, read);
-            count++;
+            System.out.println();
+            System.out.println("Reception complete");
+
+        } catch (IOException e) {
+            throw new IOException(e);
+        } finally {
+            Utils.close(fos);
+            Utils.close(dis);
+            Utils.close(receiverSocket);
         }
-        System.out.println();
-        System.out.println("Reception complete");
-        fos.close();
-        dis.close();
-        receiverSocket.close();
     }
 
     private String genName(String fileName, int index) {

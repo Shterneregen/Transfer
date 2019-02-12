@@ -1,9 +1,6 @@
 package random;
 
-import com.sun.net.ssl.internal.ssl.Provider;
-
 import java.io.IOException;
-import java.security.Security;
 import java.util.Arrays;
 
 public class Main {
@@ -11,14 +8,12 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-
             if (args.length > 0) {
                 int index = 0;
                 String mode = args[index++];
                 String[] params = Arrays.copyOfRange(args, index, args.length);
 
                 if ("-r".equals(mode)) {
-                    Security.addProvider(new Provider());
                     receive(params);
                 } else if ("-t".equals(mode)) {
                     transmit(params);
@@ -30,7 +25,6 @@ public class Main {
                     help();
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             help();
@@ -47,7 +41,8 @@ public class Main {
         String ip = args[0];
         int port = Integer.parseInt(args[1]);
         String file = args[2];
-        FileSender fc = new FileSender(ip, port, false, file);
+        FileSender fs = new FileSender(ip, port, false);
+        fs.sendFile(file);
     }
 
     private static void receiveSsl(String[] args) throws Exception {
@@ -91,7 +86,8 @@ public class Main {
             return;
         }
         setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
-        FileSender fc = new FileSender(ip, port, true, file);
+        FileSender fs = new FileSender(ip, port, true);
+        fs.sendFile(file);
     }
 
     private static void setSecurity(String keyStorePath, String keyStorePsw,
