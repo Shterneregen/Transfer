@@ -1,6 +1,8 @@
-package random;
+package random.file;
 
-import javax.net.ssl.SSLSocketFactory;
+import random.util.SocketFactory;
+import random.util.Utils;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,13 +17,7 @@ public class FileSender {
     public FileSender(String host, int port, boolean isSecure) throws IOException {
         System.out.println("SSL: " + isSecure);
         this.port = port;
-        if (isSecure) {
-            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            socket = sslsocketfactory.createSocket(host, port);
-        } else {
-            socket = new Socket(host, port);
-        }
-        socket.setSoTimeout(15000);
+        socket = SocketFactory.getClientSocket(host, port, isSecure);
     }
 
     public void sendFile(String filePath) throws IOException {

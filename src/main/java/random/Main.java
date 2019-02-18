@@ -1,9 +1,18 @@
 package random;
 
+import random.comand.Client;
+import random.comand.Server;
+import random.file.FileReceiver;
+import random.file.FileSender;
+import random.util.Utils;
+
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Main {
+
+    private static String keyStorePath, keyStorePsw, trustStorePath, trustStorePsw, file;
 
     public static void main(String[] args) {
 
@@ -21,6 +30,10 @@ public class Main {
                     receiveSsl(params);
                 } else if ("-ts".equals(mode)) {
                     transmitSsl(params);
+                } else if ("-wc".equals(mode)) {
+                    waitCommand(params);
+                } else if ("-c".equals(mode)) {
+                    command(params);
                 } else {
                     help();
                 }
@@ -28,6 +41,47 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
             help();
+        }
+    }
+
+    private static void waitCommand(String[] args) throws Exception {
+        int port = Integer.parseInt(args[0]);
+        if (args.length == 5) {
+            initStoresProperties(args[1], args[2], args[3], args[4]);
+        } else if (args.length == 3) {
+            initStoresProperties(args[1], args[2], args[1], args[2]);
+        } else {
+            return;
+        }
+        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
+        Server server = new Server(port, true);
+        server.start();
+    }
+
+    private static void command(String[] args) throws Exception {
+        String ip = args[0];
+        int port = Integer.parseInt(args[1]);
+        if (args.length == 6) {
+            initStoresProperties(args[2], args[3], args[4], args[5]);
+        } else if (args.length == 4) {
+            initStoresProperties(args[2], args[3], args[2], args[3]);
+        } else {
+            return;
+        }
+        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
+
+        String command;
+        while (true) {
+            Scanner in = new Scanner(System.in);
+            System.out.print("Enter command: ");
+            command = in.nextLine();
+
+            if (command.equals("exit")) {
+                break;
+            }
+
+            Client client = new Client(ip, port, true);
+            client.sendCommand(command);
         }
     }
 
@@ -47,21 +101,14 @@ public class Main {
 
     private static void receiveSsl(String[] args) throws Exception {
         int port = Integer.parseInt(args[0]);
-        String keyStorePath, keyStorePsw, trustStorePath, trustStorePsw;
         if (args.length == 5) {
-            keyStorePath = args[1];
-            keyStorePsw = args[2];
-            trustStorePath = args[3];
-            trustStorePsw = args[4];
+            initStoresProperties(args[1], args[2], args[3], args[4]);
         } else if (args.length == 3) {
-            keyStorePath = args[1];
-            keyStorePsw = args[2];
-            trustStorePath = args[1];
-            trustStorePsw = args[2];
+            initStoresProperties(args[1], args[2], args[1], args[2]);
         } else {
             return;
         }
-        setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
+        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
         FileReceiver fs = new FileReceiver(port, true);
         fs.start();
     }
@@ -69,33 +116,32 @@ public class Main {
     private static void transmitSsl(String[] args) throws IOException {
         String ip = args[0];
         int port = Integer.parseInt(args[1]);
-        String keyStorePath, keyStorePsw, trustStorePath, trustStorePsw, file;
         if (args.length == 7) {
-            keyStorePath = args[2];
-            keyStorePsw = args[3];
-            trustStorePath = args[4];
-            trustStorePsw = args[5];
-            file = args[6];
+            initStoresProperties(args[2], args[3], args[4], args[5], args[6]);
         } else if (args.length == 5) {
-            keyStorePath = args[2];
-            keyStorePsw = args[3];
-            trustStorePath = args[2];
-            trustStorePsw = args[3];
-            file = args[4];
+            initStoresProperties(args[2], args[3], args[2], args[3], args[4]);
         } else {
             return;
         }
-        setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
+        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
         FileSender fs = new FileSender(ip, port, true);
         fs.sendFile(file);
     }
 
-    private static void setSecurity(String keyStorePath, String keyStorePsw,
-                                    String trustStorePath, String trustStorePsw) {
-        System.setProperty("javax.net.ssl.keyStore", keyStorePath);
-        System.setProperty("javax.net.ssl.keyStorePassword", keyStorePsw);
-        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePsw);
+    private static void initStoresProperties(String keyStorePath, String keyStorePsw, String trustStorePath, String trustStorePsw) {
+        initStoresProperties(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw, null);
+    }
+
+    private static void initStoresProperties(String keyStorePath,
+                                             String keyStorePsw,
+                                             String trustStorePath,
+                                             String trustStorePsw,
+                                             String file) {
+        Main.keyStorePath = keyStorePath;
+        Main.keyStorePsw = keyStorePsw;
+        Main.trustStorePath = trustStorePath;
+        Main.trustStorePsw = trustStorePsw;
+        Main.file = file;
     }
 
     private static void help() {
