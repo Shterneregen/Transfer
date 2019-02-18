@@ -1,6 +1,8 @@
-package random;
+package random.file;
 
-import javax.net.ssl.SSLServerSocketFactory;
+import random.util.SocketFactory;
+import random.util.Utils;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,12 +15,7 @@ public class FileReceiver extends Thread {
     private ServerSocket serverSocket;
 
     public FileReceiver(int port, boolean isSecure) throws Exception {
-        if (isSecure) {
-            SSLServerSocketFactory sslServerSocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            serverSocket = sslServerSocketfactory.createServerSocket(port);
-        } else {
-            serverSocket = new ServerSocket(port);
-        }
+        serverSocket = SocketFactory.getServerSocket(port, isSecure);
         System.out.println("SSL: " + isSecure);
         System.out.println("Ready to receive on port " + port + "\n");
     }
