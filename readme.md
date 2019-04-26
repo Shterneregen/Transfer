@@ -1,4 +1,4 @@
-# File transfer over the network
+# File and commands transfer over the network
 
 ## Simple mode
 ### receiver
@@ -20,6 +20,16 @@ java -jar transfer.jar -rs RECEIVER_PORT RECEIVER_KEYSTORE_PATH RECEIVER_KEYSTOR
 ```
 java -jar transfer.jar -ts RECEIVER_IP RECEIVER_PORT TRANSMITTER_KEYSTORE_PATH TRANSMITTER_KEYSTORE_PASSWORD FILE_TO_SEND
 java -jar transfer.jar -ts RECEIVER_IP RECEIVER_PORT TRANSMITTER_KEYSTORE_PATH TRANSMITTER_KEYSTORE_PASSWORD TRANSMITTER_TRUSTSTORE_PATH TRANSMITTER_TRUSTSTORE_PASSWORD FILE_TO_SEND
+```
+
+### Command waiter
+```
+java -jar transfer.jar -wc WAITER_PORT WAITER_KEYSTORE_PATH WAITER_KEYSTORE_PASSWORD
+```
+
+### Command sender
+```
+java -jar transfer.jar -c WAITER_IP WAITER_PORT COMMANDER_KEYSTORE_PATH COMMANDER_KEYSTORE_PASSWORD
 ```
 
 ### How to create client / server keystores

@@ -8,6 +8,9 @@ import java.net.Socket;
 
 public class SocketFactory {
 
+    private SocketFactory() {
+    }
+
     public static ServerSocket getServerSocket(int port, boolean isSecure) throws IOException {
         ServerSocket serverSocket;
         if (isSecure) {

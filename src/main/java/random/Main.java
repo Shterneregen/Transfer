@@ -9,10 +9,18 @@ import random.util.Utils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
 
-    private static String keyStorePath, keyStorePsw, trustStorePath, trustStorePsw, file;
+    private static final Logger LOG = Logger.getLogger(Main.class.getName());
+
+    private static String keyStorePath;
+    private static String keyStorePsw;
+    private static String trustStorePath;
+    private static String trustStorePsw;
+    private static String file;
 
     public static void main(String[] args) {
 
@@ -39,12 +47,12 @@ public class Main {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getMessage(), e);
             help();
         }
     }
 
-    private static void waitCommand(String[] args) throws Exception {
+    private static void waitCommand(String[] args) throws IOException {
         int port = Integer.parseInt(args[0]);
         if (args.length == 5) {
             initStoresProperties(args[1], args[2], args[3], args[4]);
@@ -58,7 +66,7 @@ public class Main {
         server.start();
     }
 
-    private static void command(String[] args) throws Exception {
+    private static void command(String[] args) throws IOException {
         String ip = args[0];
         int port = Integer.parseInt(args[1]);
         if (args.length == 6) {
@@ -85,7 +93,7 @@ public class Main {
         }
     }
 
-    private static void receive(String[] args) throws Exception {
+    private static void receive(String[] args) throws IOException {
         int port = Integer.parseInt(args[0]);
         FileReceiver fs = new FileReceiver(port, false);
         fs.start();
@@ -99,7 +107,7 @@ public class Main {
         fs.sendFile(file);
     }
 
-    private static void receiveSsl(String[] args) throws Exception {
+    private static void receiveSsl(String[] args) throws IOException {
         int port = Integer.parseInt(args[0]);
         if (args.length == 5) {
             initStoresProperties(args[1], args[2], args[3], args[4]);

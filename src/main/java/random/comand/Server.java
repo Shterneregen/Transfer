@@ -11,15 +11,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server extends Thread {
 
+    private static final Logger LOG = Logger.getLogger(Server.class.getName());
+
     private ServerSocket serverSocket;
 
-    public Server(int port, boolean isSecure) throws Exception {
+    public Server(int port, boolean isSecure) throws IOException {
         serverSocket = SocketFactory.getServerSocket(port, isSecure);
     }
 
+    @Override
     public void run() {
         try {
             while (true) {
@@ -27,7 +32,7 @@ public class Server extends Thread {
                 exec(receiverSocket);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             Utils.close(serverSocket);
         }
@@ -44,13 +49,13 @@ public class Server extends Thread {
             }
 
             System.out.println("command: " + command);
-            List<String> result = runCommand(command, "cp866"); // "windows-1251", "utf8", "cp866"
+            List<String> result = runCommand(command, Encoding.CP_866);
 
             for (String res : result) {
                 toClient.println(res);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getMessage(), e);
         }
 
     }
@@ -75,7 +80,7 @@ public class Server extends Thread {
                 result.add(s);
             }
         } catch (Exception e) {
-            e.printStackTrace(System.err);
+            LOG.log(Level.SEVERE, e.getMessage(), e);
         }
         return result;
     }

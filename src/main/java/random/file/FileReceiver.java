@@ -9,24 +9,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileReceiver extends Thread {
 
+    private static final Logger LOG = Logger.getLogger(FileReceiver.class.getName());
+
     private ServerSocket serverSocket;
 
-    public FileReceiver(int port, boolean isSecure) throws Exception {
+    public FileReceiver(int port, boolean isSecure) throws IOException {
         serverSocket = SocketFactory.getServerSocket(port, isSecure);
         System.out.println("SSL: " + isSecure);
         System.out.println("Ready to receive on port " + port + "\n");
     }
 
+    @Override
     public void run() {
         while (true) {
             try {
                 Socket receiverSocket = serverSocket.accept();
                 saveFile(receiverSocket);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
@@ -84,7 +89,7 @@ public class FileReceiver extends Thread {
     }
 
     private String getFileExtension(String name) {
-        int lastIndexOf = name.lastIndexOf(".");
+        int lastIndexOf = name.lastIndexOf('.');
         if (lastIndexOf == -1) {
             return ""; // empty extension
         }
