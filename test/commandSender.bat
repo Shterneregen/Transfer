@@ -1,3 +1,0 @@
-@echo off
-java -jar transfer.jar -c 127.0.0.1 9988 "%USERPROFILE%\client.jks" JKS_PASSWORD
-pause

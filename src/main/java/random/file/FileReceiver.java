@@ -16,7 +16,8 @@ public class FileReceiver extends Thread {
 
     private static final Logger LOG = Logger.getLogger(FileReceiver.class.getName());
 
-    private ServerSocket serverSocket;
+    private final ServerSocket serverSocket;
+    private volatile boolean stop = false;
 
     public FileReceiver(int port, boolean isSecure) throws IOException {
         serverSocket = SocketFactory.getServerSocket(port, isSecure);
@@ -26,13 +27,20 @@ public class FileReceiver extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                Socket receiverSocket = serverSocket.accept();
-                saveFile(receiverSocket);
-            } catch (IOException e) {
-                LOG.log(Level.SEVERE, e.getMessage(), e);
+        System.out.println("File receiver started");
+        Socket receiverSocket = null;
+        try {
+            while (!stop) {
+                try {
+                    receiverSocket = serverSocket.accept();
+                    saveFile(receiverSocket);
+                } catch (IOException e) {
+                    LOG.log(Level.SEVERE, e.getMessage(), e);
+                }
             }
+        } finally {
+            System.out.println("Closing file receiver socket");
+            Utils.close(receiverSocket);
         }
     }
 
@@ -49,7 +57,7 @@ public class FileReceiver extends Thread {
             System.out.println("File name: " + fileName);
             System.out.println("File size: " + fileSize + " bytes");
 
-            fos = new FileOutputStream(genName(fileName, 0));
+            fos = new FileOutputStream(getName(fileName, 0));
 
             int count = 1;
             int read = 0;
@@ -76,13 +84,13 @@ public class FileReceiver extends Thread {
         }
     }
 
-    private String genName(String fileName, int index) {
+    private String getName(String fileName, int index) {
         File tmpDir = new File(fileName);
         boolean exists = tmpDir.exists();
         if (exists) {
             String ext = getFileExtension(fileName);
             String name = String.format("%s.%s", index, ext);
-            return genName(name, ++index);
+            return getName(name, ++index);
         } else {
             return fileName;
         }
@@ -94,6 +102,10 @@ public class FileReceiver extends Thread {
             return ""; // empty extension
         }
         return name.substring(lastIndexOf + 1);
+    }
+
+    public void setStop(boolean stop) {
+        this.stop = stop;
     }
 
 }

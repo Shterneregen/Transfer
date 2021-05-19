@@ -11,8 +11,8 @@ import java.net.Socket;
 
 public class FileSender {
 
-    private int port;
-    private Socket socket;
+    private final int port;
+    private final Socket socket;
 
     public FileSender(String host, int port, boolean isSecure) throws IOException {
         System.out.println("SSL: " + isSecure);

@@ -4,7 +4,7 @@ import random.comand.Client;
 import random.comand.Server;
 import random.file.FileReceiver;
 import random.file.FileSender;
-import random.util.Utils;
+import random.util.SslConfig;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,12 +15,6 @@ import java.util.logging.Logger;
 public class Main {
 
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
-
-    private static String keyStorePath;
-    private static String keyStorePsw;
-    private static String trustStorePath;
-    private static String trustStorePsw;
-    private static String file;
 
     public static void main(String[] args) {
 
@@ -55,13 +49,13 @@ public class Main {
     private static void waitCommand(String[] args) throws IOException {
         int port = Integer.parseInt(args[0]);
         if (args.length == 5) {
-            initStoresProperties(args[1], args[2], args[3], args[4]);
+            SslConfig.setSecurity(args[1], args[2], args[3], args[4]);
         } else if (args.length == 3) {
-            initStoresProperties(args[1], args[2], args[1], args[2]);
+            SslConfig.setSecurity(args[1], args[2], args[1], args[2]);
         } else {
+            help();
             return;
         }
-        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
         Server server = new Server(port, true);
         server.start();
     }
@@ -70,13 +64,13 @@ public class Main {
         String ip = args[0];
         int port = Integer.parseInt(args[1]);
         if (args.length == 6) {
-            initStoresProperties(args[2], args[3], args[4], args[5]);
+            SslConfig.setSecurity(args[2], args[3], args[4], args[5]);
         } else if (args.length == 4) {
-            initStoresProperties(args[2], args[3], args[2], args[3]);
+            SslConfig.setSecurity(args[2], args[3], args[2], args[3]);
         } else {
+            help();
             return;
         }
-        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
 
         String command;
         while (true) {
@@ -110,13 +104,13 @@ public class Main {
     private static void receiveSsl(String[] args) throws IOException {
         int port = Integer.parseInt(args[0]);
         if (args.length == 5) {
-            initStoresProperties(args[1], args[2], args[3], args[4]);
+            SslConfig.setSecurity(args[1], args[2], args[3], args[4]);
         } else if (args.length == 3) {
-            initStoresProperties(args[1], args[2], args[1], args[2]);
+            SslConfig.setSecurity(args[1], args[2], args[1], args[2]);
         } else {
+            help();
             return;
         }
-        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
         FileReceiver fs = new FileReceiver(port, true);
         fs.start();
     }
@@ -124,32 +118,19 @@ public class Main {
     private static void transmitSsl(String[] args) throws IOException {
         String ip = args[0];
         int port = Integer.parseInt(args[1]);
+        String file;
         if (args.length == 7) {
-            initStoresProperties(args[2], args[3], args[4], args[5], args[6]);
+            file = args[6];
+            SslConfig.setSecurity(args[2], args[3], args[4], args[5]);
         } else if (args.length == 5) {
-            initStoresProperties(args[2], args[3], args[2], args[3], args[4]);
+            file = args[4];
+            SslConfig.setSecurity(args[2], args[3], args[2], args[3]);
         } else {
+            help();
             return;
         }
-        Utils.setSecurity(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw);
         FileSender fs = new FileSender(ip, port, true);
         fs.sendFile(file);
-    }
-
-    private static void initStoresProperties(String keyStorePath, String keyStorePsw, String trustStorePath, String trustStorePsw) {
-        initStoresProperties(keyStorePath, keyStorePsw, trustStorePath, trustStorePsw, null);
-    }
-
-    private static void initStoresProperties(String keyStorePath,
-                                             String keyStorePsw,
-                                             String trustStorePath,
-                                             String trustStorePsw,
-                                             String file) {
-        Main.keyStorePath = keyStorePath;
-        Main.keyStorePsw = keyStorePsw;
-        Main.trustStorePath = trustStorePath;
-        Main.trustStorePsw = trustStorePsw;
-        Main.file = file;
     }
 
     private static void help() {

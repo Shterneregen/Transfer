@@ -1,6 +1,7 @@
 package random.comand;
 
 import random.util.SocketFactory;
+import random.util.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class Client {
 
     private static final Logger LOG = Logger.getLogger(Client.class.getName());
 
-    private Socket socket;
+    private final Socket socket;
 
     public Client(String host, int port, boolean isSecure) throws IOException {
         socket = SocketFactory.getClientSocket(host, port, isSecure);
@@ -29,9 +30,10 @@ public class Client {
             while ((line = fromServer.readLine()) != null) {
                 System.out.println(line);
             }
-            socket.close();
         } catch (IOException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            Utils.close(socket);
         }
     }
 }

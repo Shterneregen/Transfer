@@ -23,4 +23,6 @@ out/
 *.jar
 *.jpg
 *.jks
+*.cert
+*.old
 !gradle-wrapper.jar

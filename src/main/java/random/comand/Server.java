@@ -18,7 +18,8 @@ public class Server extends Thread {
 
     private static final Logger LOG = Logger.getLogger(Server.class.getName());
 
-    private ServerSocket serverSocket;
+    private final ServerSocket serverSocket;
+    private boolean stop = false;
 
     public Server(int port, boolean isSecure) throws IOException {
         serverSocket = SocketFactory.getServerSocket(port, isSecure);
@@ -27,7 +28,7 @@ public class Server extends Thread {
     @Override
     public void run() {
         try {
-            while (true) {
+            while (!stop) {
                 Socket receiverSocket = serverSocket.accept();
                 exec(receiverSocket);
             }
@@ -45,7 +46,9 @@ public class Server extends Thread {
             String command = fromClient.readLine();
 
             if ("server stop".equalsIgnoreCase(command)) {
-                System.exit(0);
+                stop = true;
+                System.out.println("Server stopping");
+                return;
             }
 
             System.out.println("command: " + command);
@@ -62,12 +65,12 @@ public class Server extends Thread {
 
     private static List<String> runCommand(String command, String encoding) {
         List<String> result = new ArrayList<>();
+        BufferedReader stdInput = null;
+        BufferedReader stdError = null;
         try {
             Process process = Runtime.getRuntime().exec(command);
-            BufferedReader stdInput = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), encoding));
-            BufferedReader stdError = new BufferedReader(
-                    new InputStreamReader(process.getErrorStream(), encoding));
+            stdInput = new BufferedReader(new InputStreamReader(process.getInputStream(), encoding));
+            stdError = new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding));
 
             String s;
             while ((s = stdInput.readLine()) != null) {
@@ -81,6 +84,9 @@ public class Server extends Thread {
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            Utils.close(stdInput);
+            Utils.close(stdError);
         }
         return result;
     }
